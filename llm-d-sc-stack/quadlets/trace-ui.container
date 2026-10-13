@@ -1,0 +1,23 @@
+[Unit]
+Description=Praxis trace relay and request trace dashboard
+After=network-online.target
+Wants=network-online.target
+
+[Container]
+Image=quay.io/rmalone/praxis-trace-ui:latest
+ContainerName=trace-ui
+Network=llm-d-sc.network
+PublishPort=127.0.0.1:8095:8080
+UserNS=keep-id:uid=1001
+Volume=%h/llm-d-sc-stack/trace-data:/data:Z
+Environment=PRAXIS_UPSTREAM=http://praxis:8080
+Environment=CPU_UPSTREAM=http://vllm-cpu:8080
+Environment=GPU_UPSTREAM=http://vllm-gpu:8000
+Environment=TRACE_DB_PATH=/data/traces.db
+
+[Service]
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=default.target

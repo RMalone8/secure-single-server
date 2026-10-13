@@ -1,0 +1,28 @@
+version: 1
+filesystem_policy:
+  include_workdir: true
+  read_only: [/usr, /lib, /lib64, /etc, /proc, /dev/urandom, /opt]
+  read_write: [/sandbox, /home, /tmp, /dev/null]
+landlock: {compatibility: best_effort}
+network_policies:
+  praxis_gateway:
+    name: praxis-gateway
+    endpoints:
+      - {host: host.openshell.internal, port: @@PRAXIS_PORT@@, protocol: rest, access: read-write, enforcement: enforce}
+    binaries: [{path: /usr/sbin/node}, {path: /usr/local/sbin/opencode}, {path: /usr/bin/node-26}, {path: /usr/local/bin/opencode}]
+  opencode_registry:
+    name: opencode-registry
+    endpoints: [{host: opencode.ai, port: 443}]
+    binaries: [{path: /usr/sbin/node}, {path: /usr/local/sbin/opencode}]
+  github_api:
+    name: github-api
+    endpoints: [{host: api.github.com, port: 443, protocol: rest, enforcement: enforce, access: read-only}]
+    binaries: [{path: /usr/sbin/node}, {path: /usr/sbin/git}]
+  github_git:
+    name: github-git
+    endpoints: [{host: github.com, port: 443}]
+    binaries: [{path: /usr/sbin/git}]
+  npm_registry:
+    name: npm-registry
+    endpoints: [{host: registry.npmjs.org, port: 443}]
+    binaries: [{path: /usr/sbin/node}, {path: /usr/sbin/npm}]

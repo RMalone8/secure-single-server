@@ -1,0 +1,20 @@
+[Unit]
+Description=llm-d-sc complexity classifier
+After=network-online.target
+Wants=network-online.target
+
+[Container]
+Image=quay.io/rmalone/llm-d-sc:latest
+ContainerName=llm-d-sc
+Network=llm-d-sc.network
+Volume=%h/llm-d-sc-stack/models:/models:ro,Z
+Environment=LLM_D_SC_MODEL_DIR=/models
+Environment=LLM_D_SC_CLASSIFIER=complexity
+Environment=LLM_D_SC_LISTEN=0.0.0.0:50051
+
+[Service]
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=default.target

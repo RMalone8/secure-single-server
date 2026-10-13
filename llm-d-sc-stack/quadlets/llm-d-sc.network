@@ -1,0 +1,6 @@
+[Unit]
+Description=Network for the llm-d-sc Praxis stack
+
+[Network]
+NetworkName=llm-d-sc
+Driver=bridge

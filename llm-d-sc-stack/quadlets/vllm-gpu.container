@@ -1,0 +1,27 @@
+[Unit]
+Description=vLLM GPU backend (Qwen3.5-4B)
+After=network-online.target
+Wants=network-online.target
+
+[Container]
+Image=registry.redhat.io/rhaii/vllm-cuda-rhel9:3.5.0
+ContainerName=vllm-gpu
+Network=llm-d-sc.network
+PublishPort=127.0.0.1:8000:8000
+SecurityLabelDisable=true
+# ipc handled via PodmanArgs below
+UserNS=keep-id:uid=1001
+PodmanArgs=--ipc=host --device=nvidia.com/gpu=all
+Volume=%h/model-cache:/opt/app-root/src/.cache:Z
+Environment=HF_HUB_OFFLINE=0
+Environment=HUGGING_FACE_HUB_TOKEN=
+Exec=--model Qwen/Qwen3.5-4B --host 0.0.0.0 --port 8000 --gpu-memory-utilization 0.9 --max-model-len 32768 --tensor-parallel-size 1 --enable-auto-tool-choice --tool-call-parser qwen3_coder --reasoning-parser qwen3 --served-model-name Semantic-Qwen
+
+[Service]
+Restart=on-failure
+RestartSec=10s
+TimeoutStartSec=1800
+TimeoutStopSec=60
+
+[Install]
+WantedBy=default.target

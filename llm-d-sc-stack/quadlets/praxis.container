@@ -1,0 +1,21 @@
+[Unit]
+Description=Praxis gateway with llm-d-sc routing
+After=llm-d-sc.service vllm-gpu.service vllm-cpu.service
+Wants=llm-d-sc.service vllm-gpu.service vllm-cpu.service
+
+[Container]
+Image=quay.io/rmalone/praxis-llm-d-sc:latest
+ContainerName=praxis
+Network=llm-d-sc.network
+PublishPort=127.0.0.1:8080:8080
+Volume=%h/llm-d-sc-stack/praxis.yaml:/etc/praxis/config.yaml:ro,Z
+NoNewPrivileges=true
+
+[Service]
+Restart=on-failure
+RestartSec=5s
+TimeoutStartSec=300
+TimeoutStopSec=30
+
+[Install]
+WantedBy=default.target

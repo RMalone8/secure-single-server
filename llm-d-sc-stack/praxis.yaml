@@ -1,0 +1,72 @@
+insecure_options:
+  allow_private_upstreams: true
+
+listeners:
+  - name: ai-gateway
+    address: "0.0.0.0:8080"
+    filter_chains:
+      - inference-routing
+
+filter_chains:
+  - name: inference-routing
+    filters:
+      - filter: request_id
+      - filter: access_log
+      # Hygiene filters aligned with secure-single-server configs/vllm/praxis.yaml
+      - filter: headers
+        request_remove:
+          - Authorization
+          - Proxy-Authorization
+          - Forwarded
+          - X-Forwarded-For
+          - X-Forwarded-Host
+          - X-Forwarded-Proto
+          - X-Real-IP
+          - Via
+          - X-App-Id
+          - X-Cluster
+          - X-Model
+          - X-Route
+          - X-Selected-Model
+          - X-Tier
+      - filter: rate_limit
+        mode: global
+        rate: 2
+        burst: 10
+      - filter: static_response
+        conditions:
+          - when:
+              path: "/v1/models"
+              methods: ["GET"]
+        status: 200
+        headers:
+          - name: Content-Type
+            value: application/json
+        body: >-
+          {"object":"list","data":[{"id":"Semantic-Qwen","object":"model","created":0,"owned_by":"praxis"}]}
+
+      - filter: llm_d_sc
+        endpoint: "llm-d-sc:50051"
+        default_cluster: vllm-cpu
+        routes:
+          - label: SIMPLE
+            cluster: vllm-cpu
+          - label: MEDIUM
+            cluster: vllm-cpu
+          - label: COMPLEX
+            cluster: vllm-gpu
+          - label: REASONING
+            cluster: vllm-gpu
+        timeout_ms: 500
+        connect_timeout_ms: 1000
+        min_score: 0.0
+        on_unavailable: default_cluster
+        on_resource_exhausted: default_cluster
+        emit_headers: true
+
+      - filter: load_balancer
+        clusters:
+          - name: vllm-gpu
+            endpoints: ["trace-ui:8082"]
+          - name: vllm-cpu
+            endpoints: ["trace-ui:8081"]
