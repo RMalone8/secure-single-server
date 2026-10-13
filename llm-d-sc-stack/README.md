@@ -24,8 +24,13 @@ This stack extends an existing secure-single-server deployment; it is not a
 standalone installer. The deployment steps below assume you are starting
 from this state:
 
-- A mutable RHEL 9 x86_64 host with a single NVIDIA L4 GPU
-  (g5.xlarge-class: 8 vCPU / 32 GiB) and ~120 GiB of root disk.
+- A mutable RHEL 9 x86_64 host with enough capacity for both inference
+  tiers: 8+ vCPUs (the CPU backend's quadlet binds OMP threads to cores
+  0-5 - adjust `VLLM_CPU_OMP_THREADS_BIND` and `OMP_NUM_THREADS` on
+  smaller hosts), 32 GiB RAM recommended or 16 GiB minimum with the CPU
+  backend's KV cache reduced, one NVIDIA GPU with ~24 GiB VRAM for the
+  GPU tier, and ~100 GiB of free disk (the GPU inference image alone is
+  ~30 GiB).
 - OpenShell v0.1.3 installed per the upstream
   [manual single-server guide](../docs/quickstarts/openshell-single-server/manual.md)
   (`openshell/scripts/install.sh --owner openshell-svc`): locked
