@@ -63,7 +63,7 @@ then continue from the deployment steps below.
 ```bash
 # 1. stack files where the quadlets expect them
 cp -r llm-d-sc-stack ~/
-mkdir -p ~/model-cache
+mkdir -p ~/model-cache ~/llm-d-sc-stack/models ~/llm-d-sc-stack/trace-data
 
 # 2. classifier model from the ModelCar image
 cid=$(podman create quay.io/rmalone/llm-d-sc-modelcar:latest /bin/true)
@@ -77,10 +77,16 @@ systemctl --user daemon-reload
 systemctl --user start llm-d-sc vllm-cpu vllm-gpu praxis trace-ui
 
 # 4. harness sandbox (OpenShell service account, see the manual guide)
-OPENSHELL_MODEL_ID=Semantic-Qwen PRAXIS_PORT=8095 \
-  os_run openshell/harnesses/opencode/create.sh --profile dev \
+os_run env OPENSHELL_MODEL_ID=Semantic-Qwen PRAXIS_PORT=8095 \
+  openshell/harnesses/opencode/create.sh --profile dev \
   --name opencode-praxis --config "$PWD/configs/llm-d-sc"
 ```
+
+The bind-mount source directories (`models/`, `trace-data/`) must exist
+before the services start; podman exits 125 on a missing source. Pass the
+variables through `os_run env ...` rather than prefixing them: `sudo`
+strips the caller's environment, and the script then fails with
+"set OPENSHELL_MODEL_ID".
 
 Dashboard: `ssh -L 8095:127.0.0.1:8095 HOST` then http://localhost:8095.
 
