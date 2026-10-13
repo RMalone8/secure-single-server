@@ -2,7 +2,7 @@
 
 Complexity-routed local inference for the OpenShell OpenCode harness on a
 mutable RHEL 9 single-server host, modeled on the
-[praxis-sr-demo](https://github.com/RMalone8/praxis-sr-demo) podman stack.
+[llm-d-sc demo](https://github.com/RMalone8/llm-d-sc-demo) podman stack.
 
 ```
 opencode sandbox (opencode-praxis)
@@ -17,6 +17,32 @@ opencode sandbox (opencode-praxis)
 The trace-ui backends read the `X-Llm-D-Sc-Label` praxis attaches to each
 request and annotate the response, which the front relay persists in sqlite:
 the dashboard at `:8095` shows which model each request was routed to.
+
+## Assumed starting point
+
+This stack extends an existing secure-single-server deployment; it is not a
+standalone installer. The deployment steps below assume you are starting
+from this state:
+
+- A mutable RHEL 9 x86_64 host with a single NVIDIA L4 GPU
+  (g5.xlarge-class: 8 vCPU / 32 GiB) and ~120 GiB of root disk.
+- OpenShell v0.1.3 installed per the upstream
+  [manual single-server guide](../docs/quickstarts/openshell-single-server/manual.md)
+  (`openshell/scripts/install.sh --owner openshell-svc`): locked
+  `openshell-svc` account, loopback gateway on 8090/8091, harness images
+  pre-pulled.
+- NVIDIA driver and `nvidia-container-toolkit` installed with CDI
+  generated, so `--device nvidia.com/gpu=all` resolves and `nvidia-smi`
+  works.
+- `podman login registry.redhat.io` completed - the rhaii vLLM images
+  require authentication; the `quay.io/rmalone` images are public.
+- This branch checked out at `~/secure-single-server`, readable by
+  `openshell-svc` (`chmod o+x ~` when the admin home is mode 0700).
+
+Starting from a fresh AWS instance? Run the manual guide's package step
+first, add the NVIDIA CUDA repo with `kmod-nvidia` and
+`nvidia-container-toolkit`, generate CDI (`nvidia-ctk cdi generate`), and
+then continue from the deployment steps below.
 
 ## Contents
 
