@@ -107,3 +107,9 @@ Dashboard: `ssh -L 8095:127.0.0.1:8095 HOST` then http://localhost:8095.
   the zentorch `cpu_gemm_wna16` kernel neither build registers. Harness-scale
   prompts (multi-k-token system prompt) remain slow on the CPU tier; routing
   MEDIUM to the GPU cluster is the practical mitigation.
+- The harness provider config must NOT set `interleaved: {field: reasoning}`.
+  With it, OpenCode replays earlier reasoning in the chat history, the Qwen3
+  chat template writes a `</think>` into the prompt, and vLLM's reasoning
+  parser then treats the whole next completion as already past reasoning:
+  `<think>...</think>` shows up verbatim in `content` on every turn after a
+  tool call. The `--reasoning-parser qwen3` flag itself is correct.

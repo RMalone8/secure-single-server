@@ -5,7 +5,7 @@
       "npm": "@ai-sdk/openai-compatible",
       "name": "Praxis (llm-d-sc routed)",
       "options": {"baseURL": "http://host.openshell.internal:8080/v1", "apiKey": "local-placeholder"},
-      "models": {"@@MODEL_ID@@": {"name": "Semantic-Qwen (complexity routed)", "limit": {"context": 32768, "output": 4096}, "reasoning": true, "interleaved": {"field": "reasoning"}}}
+      "models": {"@@MODEL_ID@@": {"name": "Semantic-Qwen (complexity routed)", "limit": {"context": 32768, "output": 4096}, "reasoning": true}}
     }
   }
 }
